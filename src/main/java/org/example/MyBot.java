@@ -93,7 +93,8 @@ public class MyBot extends TelegramLongPollingBot {
                 user.setLast_topic(data);
                 userService.update(chatId,user);
                 Resp print = print(String.valueOf(builder1), chatId);
-                System.out.println(print.toString());
+                System.out.println(print.getButtons().toString());
+
                 if (print.getButtons().toString().equals("[]")){
                     send(chatId,print.getOutput());
 
