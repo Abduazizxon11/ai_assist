@@ -16,7 +16,7 @@ public class UserServiceImpl implements UserService {
         if (get(user.getChatId()) == null) {
             User newUser = new User(
                     user.getChatId(), user.getState(),null
-            );
+           ,null ,null);
             users.add(newUser);
         }
 
@@ -54,6 +54,12 @@ public class UserServiceImpl implements UserService {
         for (int i = 0; i < users.size(); i++) {
             if (oldUser.getChatId() == chatId) {
                 oldUser.setHistory(user.getHistory());
+
+                users.set(i, oldUser);
+            }
+        }     for (int i = 0; i < users.size(); i++) {
+            if (oldUser.getChatId() == chatId) {
+                oldUser.setLast_topic(user.getLast_topic());
 
                 users.set(i, oldUser);
             }

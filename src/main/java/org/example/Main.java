@@ -8,7 +8,7 @@ public class Main {
     public static void main(String[] args){
         try {
             TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
-            telegramBotsApi.registerBot(new MyBot("7896721460:AAEzIqEuUFGrqWBHCzogc5OQ-SDctsUzVTU"));
+            telegramBotsApi.registerBot(new MyBot("7582921639:AAG74ev_wGQJx6zYEqXvrTKBFq4tUSPD9QA"));
         } catch (TelegramApiException e) {
             throw new RuntimeException(e);
         }
