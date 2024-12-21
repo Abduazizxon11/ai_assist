@@ -94,7 +94,7 @@ public class MyBot extends TelegramLongPollingBot {
                 userService.update(chatId,user);
                 Resp print = print(String.valueOf(builder1), chatId);
                 System.out.println(print.toString());
-                if (print.getButtons() == null){
+                if (print.getButtons().toString().equals("[]")){
                     send(chatId,print.getOutput());
 
                 }else{
