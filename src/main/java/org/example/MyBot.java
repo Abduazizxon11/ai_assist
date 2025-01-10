@@ -10,10 +10,13 @@ import org.example.model.Service.ServiceImpl.UserServiceImpl;
 import org.example.model.User;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.io.IOException;
 import java.net.URI;
@@ -21,6 +24,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 
 import static org.example.prompts.Printing_prompts.*;
@@ -36,9 +40,11 @@ public class MyBot extends TelegramLongPollingBot {
     int count = 0;
     LocalDate usedTime = null;
 
+
     public MyBot(String botToken) {
         super(botToken);
     }
+
     static ButtonService buttonService = new ButtonService();
 
     @Override
@@ -69,18 +75,6 @@ public class MyBot extends TelegramLongPollingBot {
                 userService.update(chatId, user);
                 send(chatId, "Xush kelibsiz!.Quyidagilardan birini tanlang", buttonService.getdarslikMenu());
             }
-            switch (user.getState()) {
-                case START -> {
-                    switch (update.getMessage().getText()) {
-
-                    }
-                }
-                case SECOND -> {
-
-                }
-                case COMPILER -> {
-                }
-            }
 
         } else if (update.hasCallbackQuery()) {
 
@@ -88,21 +82,30 @@ public class MyBot extends TelegramLongPollingBot {
             long chatId = update.getCallbackQuery().getMessage().getChatId();
 
             User user = userService.get(chatId);
-
-            if (user.getState() == BotState.START) {
-                user.setLast_topic(data);
+            if (data.equals("back")) {
+                send(chatId, "Quyidagilardan birini tanlang", buttonService.getdarslikMenu());
+                user.setLast_topic("");
                 userService.update(chatId,user);
+            }
+            if (user.getState() == BotState.START ) {
+                user.setLast_topic(data);
+                userService.update(chatId, user);
                 Resp print = print(String.valueOf(builder1), chatId);
-                System.out.println(print.getButtons().toString());
+                System.out.println(Arrays.toString(print.getButtons()));
 
-                if (print.getButtons().toString().equals("[]")){
-                    send(chatId,print.getOutput());
+                if (Arrays.toString(print.getButtons()).equals("[]")) {
+                    send(chatId, print.getOutput(), buttonService.createBackButton());
+                } else {
 
-                }else{
-                    InlineKeyboardMarkup inlineKeyboard = buttonService.createInlineKeyboard(print.getButtons());
-                    send(chatId,"Quyidagilardan birini tanlang",inlineKeyboard);
+                    StringBuilder plustopic = new StringBuilder(user.getLast_topic()+"->");
+                    plustopic.append(data);
+                    user.setLast_topic(String.valueOf(plustopic));
+                    userService.update(chatId,user);
+                    editMessageCaptionAndInlineKeyboard(update, "Quyidagilardan birini tanlang", print.getButtons());
+
                 }
             }
+
         }
     }
 
@@ -134,12 +137,12 @@ public class MyBot extends TelegramLongPollingBot {
         String output = "";
         System.out.println("Gone");
         if (user.getHistory() == null) {
-            jsonRequestBody = "{\"contents\":[{\"parts\":[{\"text\":\"" + builder + rule1 + builder1 + additional_right + "mavzu: " + user.getLast_topic() + "\"}]}]}";
+            jsonRequestBody = "{\"contents\":[{\"parts\":[{\"text\":\"" + builder  + builder1 + "mavzu: " + user.getLast_topic() + "Ishatishing uchun roadmap" + roadmap + "Roadmapdan chiqma" + "\"}]}]}";
         } else {
-            jsonRequestBody = "{\"contents\":[{\"parts\":[{\"text\":\"" + builder + rule1 + builder1 + " mavzu: " + user.getLast_topic() + "\"}]}]}";
+            jsonRequestBody = "{\"contents\":[{\"parts\":[{\"text\":\"" + builder  + builder1 +" mavzu: " + user.getLast_topic() + "Ishatishing uchun roadmap" + roadmap + "Roadmapdan chiqma" + "\"}]}]}";
         }
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=AIzaSyA1lyz2u1IaADLJ2RMs9UCIAbZbDKcJDFI"))  // Replace YOUR_API_KEY with the actual key
+                .uri(URI.create("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent?key=AIzaSyA1lyz2u1IaADLJ2RMs9UCIAbZbDKcJDFI"))  // Replace YOUR_API_KEY with the actual key
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(jsonRequestBody))
                 .build();
@@ -228,6 +231,25 @@ public class MyBot extends TelegramLongPollingBot {
         sendmessage.setReplyMarkup(markup);
         sendmessage.setParseMode(parseMode);
         return execute(sendmessage);
+    }
+
+    public void editMessageCaptionAndInlineKeyboard(Update update, String newCaption, String[] newButtonNames) {
+        String chatId = update.getCallbackQuery().getMessage().getChatId().toString();
+        int messageId = update.getCallbackQuery().getMessage().getMessageId();
+
+        InlineKeyboardMarkup newInlineKeyboard = buttonService.createInlineKeyboard(newButtonNames);
+
+        EditMessageText editMessage = new EditMessageText();
+        editMessage.setChatId(chatId);
+        editMessage.setMessageId(messageId);
+        editMessage.setText(newCaption);  // New caption
+        editMessage.setReplyMarkup(newInlineKeyboard);  // New inline keyboard
+
+        try {
+            execute(editMessage);  // Edits both the caption and the inline keyboard
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

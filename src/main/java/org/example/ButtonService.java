@@ -40,6 +40,23 @@ public class ButtonService {
 
         return replyKeyboardMarkup;
     }
+    public InlineKeyboardMarkup createBackButton() {
+        InlineKeyboardButton backButton = new InlineKeyboardButton();
+        backButton.setText("Orqaga");
+        backButton.setCallbackData("back");
+
+        List<InlineKeyboardButton> row = new ArrayList<>();
+        row.add(backButton);
+
+        List<List<InlineKeyboardButton>> keyboard = new ArrayList<>();
+        keyboard.add(row);
+
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        inlineKeyboardMarkup.setKeyboard(keyboard);
+
+        return inlineKeyboardMarkup;
+    }
+
     public InlineKeyboardMarkup createInlineKeyboard(String[] buttonNames) {
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> keyboardRows = new ArrayList<>();
