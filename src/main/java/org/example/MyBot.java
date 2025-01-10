@@ -93,17 +93,19 @@ public class MyBot extends TelegramLongPollingBot {
                 Resp print = print(String.valueOf(builder1), chatId);
                 System.out.println(Arrays.toString(print.getButtons()));
 
+
                 if (Arrays.toString(print.getButtons()).equals("[]")) {
                     send(chatId, print.getOutput(), buttonService.createBackButton());
-                } else {
-
-                    StringBuilder plustopic = new StringBuilder(user.getLast_topic()+"->");
-                    plustopic.append(data);
-                    user.setLast_topic(String.valueOf(plustopic));
-                    userService.update(chatId,user);
-                    editMessageCaptionAndInlineKeyboard(update, "Quyidagilardan birini tanlang", print.getButtons());
-
                 }
+//                else {
+//
+//                    StringBuilder plustopic = new StringBuilder(user.getLast_topic()+"->");
+//                    plustopic.append(data);
+//                    user.setLast_topic(String.valueOf(plustopic));
+//                    userService.update(chatId,user);
+//                    editMessageCaptionAndInlineKeyboard(update, "Quyidagilardan birini tanlang", print.getButtons());
+//
+//                }
             }
 
         }
@@ -177,6 +179,7 @@ public class MyBot extends TelegramLongPollingBot {
                 }
             }
             buttonsName.trim();
+
 
             String[] split = buttonsName.split(",");
             output = output.substring(b);
